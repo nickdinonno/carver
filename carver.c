@@ -40,14 +40,14 @@ struct hunterThreadData {
 };
 
 // Find the length of the longest file signature stored (used for creating optimized chunk overlaps)
-int findLongestFileExtension(struct fileExtension *array) {
-   int maxSignatureLength = 0;
-   for (int i = 0; i < array->length; i++) {
-      if (array[i].length > maxSignatureLength) {
-         maxSignatureLength = array[i].length;
+int findLongestFileExtension(struct fileExtension *array, int count) {
+   int maxLength = 0;
+   for (int i = 0; i < count; i++) {
+      if (array[i].length > maxLength) {
+         maxLength = array[i].length;
       }
    }
-   return maxSignatureLength;
+   return maxLength;
 }
 
 void *artifactHunter(void *arg) {
@@ -59,7 +59,9 @@ void *artifactHunter(void *arg) {
    }
 
    struct hunterThreadData* arguments = (struct hunterThreadData*) arg;
-   int maxMagicLen = findLongestFileExtension(fileExtArray);
+
+   int numExtensions = (int)(sizeof(fileExtArray) / sizeof(fileExtArray[0]));
+   int maxMagicLen = findLongestFileExtension(fileExtArray, numExtensions);
 
    // Takes the smaller of the two -cannot exceed filesize
    int extendedEnd = (maxMagicLen - 1) + arguments->stop;
@@ -102,7 +104,6 @@ void *artifactHunter(void *arg) {
                printf("Found by Thread ID: %d\n", arguments->threadId);
                printf("Found at offset: %d\n", i);
             }
-            
          }
       }
    }
